@@ -46,7 +46,7 @@ std::vector<int> generateBenchmarkData(int size, int operations, unsigned int se
 
 const std::vector<int>& benchmarkSizes() {
     // Zestaw rozmiarow, dla ktorych beda wykonywane pomiary.
-    static const std::vector<int> sizes = {10000, 20000, 40000, 80000, 100000, 160000, 320000};
+    static const std::vector<int> sizes = {10000, 20000, 40000, 80000, 100000, 160000, 320000, 640000};
     return sizes;
 }
 
