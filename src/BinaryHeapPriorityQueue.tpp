@@ -9,7 +9,7 @@ namespace binary_heap_detail {
 // Zakres losowanych wartości jest dobierany proporcjonalnie do liczby elementów.
 constexpr long long kRandomValueMultiplier = 10;
 constexpr long long kRandomValueOffset = 100;
-}  // namespace binary_heap_detail
+} 
 
 template <typename T, typename PriorityType>
 void BinaryHeapPriorityQueue<T, PriorityType>::clear() noexcept {

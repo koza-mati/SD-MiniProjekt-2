@@ -9,7 +9,7 @@ namespace linked_list_pq_detail {
 // Zakres losowanych wartości jest dobierany proporcjonalnie do liczby elementów.
 constexpr long long kRandomValueMultiplier = 10;
 constexpr long long kRandomValueOffset = 100;
-}  // namespace linked_list_pq_detail
+}  
 
 template <typename T, typename PriorityType>
 LinkedListPriorityQueue<T, PriorityType>::~LinkedListPriorityQueue() {
