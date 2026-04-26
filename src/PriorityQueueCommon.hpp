@@ -37,7 +37,6 @@ inline bool hasHigherPriority(const PriorityQueueEntry<T, PriorityType>& left,
 }
 
 /**
- * 
  * Operator wypisywania wpisu kolejki w formacie "value (priority)".
  * Używany przy listingu zawartości kolejki w menu.
  * Złożoność: O(1) (przy założeniu staloczasowego << dla T i PriorityType).
