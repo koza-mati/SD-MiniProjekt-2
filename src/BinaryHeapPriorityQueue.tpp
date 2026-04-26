@@ -1,14 +1,18 @@
 #pragma once
 
-#include <algorithm>
 #include <fstream>
-#include <limits>
 #include <random>
 #include <sstream>
-#include <stdexcept>
+#include <utility>
+
+namespace binary_heap_detail {
+// Zakres losowanych wartości jest dobierany proporcjonalnie do liczby elementów.
+constexpr long long kRandomValueMultiplier = 10;
+constexpr long long kRandomValueOffset = 100;
+}  // namespace binary_heap_detail
 
 template <typename T, typename PriorityType>
-void BinaryHeapPriorityQueue<T, PriorityType>::clear() {
+void BinaryHeapPriorityQueue<T, PriorityType>::clear() noexcept {
     // Usuwamy całą zawartość oraz zerujemy licznik kolejności wstawiania.
     data_.clear();
     nextOrder_ = 0;
@@ -30,9 +34,9 @@ BinaryHeapPriorityQueue<T, PriorityType>::extractMax() {
     }
 
     // W MAX-kopcu maksimum zawsze znajduje się w korzeniu.
-    Entry result = data_.front();
+    Entry result = std::move(data_.front());
     // Korzeń zastępujemy ostatnim elementem, a potem odtwarzamy własność kopca.
-    data_.front() = data_.back();
+    data_.front() = std::move(data_.back());
     data_.pop_back();
 
     if (!data_.empty()) {
@@ -75,13 +79,13 @@ bool BinaryHeapPriorityQueue<T, PriorityType>::modifyKey(const T& value, const P
 }
 
 template <typename T, typename PriorityType>
-std::size_t BinaryHeapPriorityQueue<T, PriorityType>::size() const {
+std::size_t BinaryHeapPriorityQueue<T, PriorityType>::size() const noexcept {
     // Rozmiar to po prostu liczba wpisów w tablicy kopca.
     return data_.size();
 }
 
 template <typename T, typename PriorityType>
-bool BinaryHeapPriorityQueue<T, PriorityType>::empty() const {
+bool BinaryHeapPriorityQueue<T, PriorityType>::empty() const noexcept {
     // Kolejka jest pusta, gdy tablica nie zawiera żadnych elementów.
     return data_.empty();
 }
@@ -153,7 +157,10 @@ void BinaryHeapPriorityQueue<T, PriorityType>::generateRandom(std::size_t count,
 
     std::random_device rd;
     std::mt19937 generator(rd());
-    std::uniform_int_distribution<long long> valueDistribution(1, static_cast<long long>(count * 10 + 100));
+    const long long valueRangeMax =
+        static_cast<long long>(count) * binary_heap_detail::kRandomValueMultiplier
+        + binary_heap_detail::kRandomValueOffset;
+    std::uniform_int_distribution<long long> valueDistribution(1, valueRangeMax);
     std::uniform_int_distribution<long long> priorityDistribution(
         static_cast<long long>(minPriority),
         static_cast<long long>(maxPriority));

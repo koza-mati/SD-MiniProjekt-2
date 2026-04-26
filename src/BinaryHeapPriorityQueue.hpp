@@ -26,13 +26,13 @@ public:
 
     BinaryHeapPriorityQueue() = default;                                             // konstruktor - O(1)
 
-    void clear() override;                                                           // czyszczenie kopca - O(n)
+    void clear() noexcept override;                                                  // czyszczenie kopca - O(n)
     void insert(const T& value, const PriorityType& priority) override;              // wstawienie elementu - O(log n)
     std::optional<Entry> extractMax() override;                                      // pobranie i usunięcie max - O(log n)
     std::optional<Entry> peek() const override;                                      // podgląd maksimum bez usuwania - O(1)
     bool modifyKey(const T& value, const PriorityType& newPriority) override;        // zmiana priorytetu elementu - O(n)
-    std::size_t size() const override;                                               // liczba elementów - O(1)
-    bool empty() const override;                                                     // czy kopiec pusty - O(1)
+    std::size_t size() const noexcept override;                                      // liczba elementów - O(1)
+    bool empty() const noexcept override;                                            // czy kopiec pusty - O(1)
     bool saveToCSV(const std::string& filename) const override;                      // zapis do pliku CSV - O(n)
     bool loadFromCSV(const std::string& filename) override;                          // wczytanie z pliku CSV - O(n log n)
     void generateRandom(std::size_t count, PriorityType minPriority, PriorityType maxPriority) override; // losowe wypełnienie - O(n log n)

@@ -3,6 +3,13 @@
 #include <fstream>
 #include <random>
 #include <sstream>
+#include <utility>
+
+namespace linked_list_pq_detail {
+// Zakres losowanych wartości jest dobierany proporcjonalnie do liczby elementów.
+constexpr long long kRandomValueMultiplier = 10;
+constexpr long long kRandomValueOffset = 100;
+}  // namespace linked_list_pq_detail
 
 template <typename T, typename PriorityType>
 LinkedListPriorityQueue<T, PriorityType>::~LinkedListPriorityQueue() {
@@ -11,7 +18,7 @@ LinkedListPriorityQueue<T, PriorityType>::~LinkedListPriorityQueue() {
 }
 
 template <typename T, typename PriorityType>
-void LinkedListPriorityQueue<T, PriorityType>::clear() {
+void LinkedListPriorityQueue<T, PriorityType>::clear() noexcept {
     // Iteracyjnie usuwamy wszystkie węzły, aby nie pozostawić wycieków pamięci.
     while (head_ != nullptr) {
         Node* next = head_->next;
@@ -41,7 +48,7 @@ LinkedListPriorityQueue<T, PriorityType>::extractMax() {
     Node* previous = nullptr;
     // Lista nie jest uporządkowana, więc przed usunięciem szukamy maksimum liniowo.
     Node* maxNode = findMaxNode(&previous);
-    Entry result = maxNode->entry;
+    Entry result = std::move(maxNode->entry);
 
     if (previous == nullptr) {
         head_ = maxNode->next;
@@ -78,13 +85,13 @@ bool LinkedListPriorityQueue<T, PriorityType>::modifyKey(const T& value, const P
 }
 
 template <typename T, typename PriorityType>
-std::size_t LinkedListPriorityQueue<T, PriorityType>::size() const {
+std::size_t LinkedListPriorityQueue<T, PriorityType>::size() const noexcept {
     // Rozmiar przechowujemy na bieżąco, bez potrzeby przechodzenia po całej liście.
     return size_;
 }
 
 template <typename T, typename PriorityType>
-bool LinkedListPriorityQueue<T, PriorityType>::empty() const {
+bool LinkedListPriorityQueue<T, PriorityType>::empty() const noexcept {
     // Pusta kolejka to taka, w której licznik elementów wynosi 0.
     return size_ == 0;
 }
@@ -156,7 +163,10 @@ void LinkedListPriorityQueue<T, PriorityType>::generateRandom(std::size_t count,
 
     std::random_device rd;
     std::mt19937 generator(rd());
-    std::uniform_int_distribution<long long> valueDistribution(1, static_cast<long long>(count * 10 + 100));
+    const long long valueRangeMax =
+        static_cast<long long>(count) * linked_list_pq_detail::kRandomValueMultiplier
+        + linked_list_pq_detail::kRandomValueOffset;
+    std::uniform_int_distribution<long long> valueDistribution(1, valueRangeMax);
     std::uniform_int_distribution<long long> priorityDistribution(
         static_cast<long long>(minPriority),
         static_cast<long long>(maxPriority));
@@ -184,18 +194,18 @@ LinkedListPriorityQueue<T, PriorityType>::findNode(const T& value) const {
 template <typename T, typename PriorityType>
 typename LinkedListPriorityQueue<T, PriorityType>::Node*
 LinkedListPriorityQueue<T, PriorityType>::findMaxNode(Node** previous) const {
-    // `best` przechowuje aktualnie najlepszy element znaleziony podczas przejścia.
+    // Startujemy od głowy (która z definicji nie ma poprzednika) i porównujemy
+    // ją kolejno z każdym następnym węzłem.
     Node* best = head_;
     Node* bestPrevious = nullptr;
-    Node* currentPrevious = nullptr;
 
     // Przy równych priorytetach wygrywa mniejsze `order`, czyli element dodany wcześniej.
-    for (Node* current = head_; current != nullptr; current = current->next) {
+    for (Node* prev = head_; prev != nullptr && prev->next != nullptr; prev = prev->next) {
+        Node* current = prev->next;
         if (hasHigherPriority(current->entry, best->entry)) {
             best = current;
-            bestPrevious = currentPrevious;
+            bestPrevious = prev;
         }
-        currentPrevious = current;
     }
 
     if (previous != nullptr) {

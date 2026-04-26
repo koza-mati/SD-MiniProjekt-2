@@ -29,13 +29,13 @@ public:
     LinkedListPriorityQueue(const LinkedListPriorityQueue&) = delete;                 // brak kopiowania (ręcznie zarządzana pamięć)
     LinkedListPriorityQueue& operator=(const LinkedListPriorityQueue&) = delete;      // brak przypisania kopiującego
 
-    void clear() override;                                                            // zwolnienie wszystkich węzłów - O(n)
+    void clear() noexcept override;                                                   // zwolnienie wszystkich węzłów - O(n)
     void insert(const T& value, const PriorityType& priority) override;               // wstawienie na początek listy - O(1)
     std::optional<Entry> extractMax() override;                                       // pobranie i usunięcie max - O(n)
     std::optional<Entry> peek() const override;                                       // podgląd maksimum bez usuwania - O(n)
     bool modifyKey(const T& value, const PriorityType& newPriority) override;         // zmiana priorytetu elementu - O(n)
-    std::size_t size() const override;                                                // liczba elementów - O(1)
-    bool empty() const override;                                                      // czy lista pusta - O(1)
+    std::size_t size() const noexcept override;                                       // liczba elementów - O(1)
+    bool empty() const noexcept override;                                             // czy lista pusta - O(1)
     bool saveToCSV(const std::string& filename) const override;                       // zapis do pliku CSV - O(n)
     bool loadFromCSV(const std::string& filename) override;                           // wczytanie z pliku CSV - O(n)
     void generateRandom(std::size_t count, PriorityType minPriority, PriorityType maxPriority) override; // losowe wypełnienie - O(n)

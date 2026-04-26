@@ -145,6 +145,17 @@ void benchmarkQueue(const std::string& structureName, const std::string& results
         long long sumModifyKeyDecrease = 0;
         long long sumSize = 0;
 
+        // Każdy pomiar startuje od świeżo zbudowanej struktury o tym samym rozmiarze N,
+        // dzięki czemu kolejne operacje nie wpływają na siebie wzajemnie.
+        const auto measureOperation = [&](const std::vector<int>& values, auto&& operation) {
+            Queue queue;
+            fillQueueForBenchmark(queue, values, size);
+            const auto start = Clock::now();
+            operation(queue);
+            const auto end = Clock::now();
+            return std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
+        };
+
         for (int attempt = 0; attempt < kBenchmarkAttempts; ++attempt) {
             // Dla każdej próby przygotowujemy zestaw danych zależny od rozmiaru i numeru próby.
             const auto values = generateBenchmarkData(size, size + 4, benchmarkSeed(size, attempt));
@@ -154,61 +165,26 @@ void benchmarkQueue(const std::string& structureName, const std::string& results
             const int insertValue = values[size * 2 + 2];
             const int insertPriority = values[size * 2 + 3];
 
-            {
-                Queue queue;
-                fillQueueForBenchmark(queue, values, size);
-                // Każdy pomiar startuje od świeżo zbudowanej struktury o tym samym rozmiarze N.
-                const auto start = Clock::now();
-                queue.insert(insertValue, insertPriority);
-                const auto end = Clock::now();
-                sumInsert += std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
-            }
-
-            {
-                Queue queue;
-                fillQueueForBenchmark(queue, values, size);
-                const auto start = Clock::now();
-                queue.extractMax();
-                const auto end = Clock::now();
-                sumExtractMax += std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
-            }
-
-            {
-                Queue queue;
-                fillQueueForBenchmark(queue, values, size);
-                const auto start = Clock::now();
-                queue.peek();
-                const auto end = Clock::now();
-                sumPeek += std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
-            }
-
-            {
-                Queue queue;
-                fillQueueForBenchmark(queue, values, size);
-                const auto start = Clock::now();
-                queue.modifyKey(targetValue, increasedPriority);
-                const auto end = Clock::now();
-                sumModifyKeyIncrease += std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
-            }
-
-            {
-                Queue queue;
-                fillQueueForBenchmark(queue, values, size);
-                const auto start = Clock::now();
-                queue.modifyKey(targetValue, decreasedPriority);
-                const auto end = Clock::now();
-                sumModifyKeyDecrease += std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
-            }
-
-            {
-                Queue queue;
-                fillQueueForBenchmark(queue, values, size);
-                const auto start = Clock::now();
-                volatile const auto measuredSize = queue.size();
+            sumInsert += measureOperation(values, [&](Queue& q) {
+                q.insert(insertValue, insertPriority);
+            });
+            sumExtractMax += measureOperation(values, [](Queue& q) {
+                q.extractMax();
+            });
+            sumPeek += measureOperation(values, [](Queue& q) {
+                q.peek();
+            });
+            sumModifyKeyIncrease += measureOperation(values, [&](Queue& q) {
+                q.modifyKey(targetValue, increasedPriority);
+            });
+            sumModifyKeyDecrease += measureOperation(values, [&](Queue& q) {
+                q.modifyKey(targetValue, decreasedPriority);
+            });
+            sumSize += measureOperation(values, [](Queue& q) {
+                // `volatile` zapobiega usunięciu wywołania przez optymalizator.
+                volatile const auto measuredSize = q.size();
                 (void)measuredSize;
-                const auto end = Clock::now();
-                sumSize += std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
-            }
+            });
         }
 
         const long long avgInsert = sumInsert / kBenchmarkAttempts;
