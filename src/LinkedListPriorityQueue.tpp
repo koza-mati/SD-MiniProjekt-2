@@ -6,13 +6,13 @@
 
 template <typename T, typename PriorityType>
 LinkedListPriorityQueue<T, PriorityType>::~LinkedListPriorityQueue() {
-    // Destruktor zwalnia cala dynamicznie zaalokowana liste.
+    // Destruktor zwalnia całą dynamicznie zaalokowaną listę.
     clear();
 }
 
 template <typename T, typename PriorityType>
 void LinkedListPriorityQueue<T, PriorityType>::clear() {
-    // Iteracyjnie usuwamy wszystkie wezly, aby nie pozostawic wyciekow pamieci.
+    // Iteracyjnie usuwamy wszystkie węzły, aby nie pozostawić wycieków pamięci.
     while (head_ != nullptr) {
         Node* next = head_->next;
         delete head_;
@@ -25,7 +25,7 @@ void LinkedListPriorityQueue<T, PriorityType>::clear() {
 
 template <typename T, typename PriorityType>
 void LinkedListPriorityQueue<T, PriorityType>::insert(const T& value, const PriorityType& priority) {
-    // Wstawienie na poczatek jest stale, maksimum wyszukujemy dopiero przy odczycie/usunieciu.
+    // Wstawienie na początek jest stałe, maksimum wyszukujemy dopiero przy odczycie/usunięciu.
     Node* node = new Node{{value, priority, nextOrder_++}, head_};
     head_ = node;
     ++size_;
@@ -39,7 +39,7 @@ LinkedListPriorityQueue<T, PriorityType>::extractMax() {
     }
 
     Node* previous = nullptr;
-    // Lista nie jest uporzadkowana, wiec przed usunieciem szukamy maksimum liniowo.
+    // Lista nie jest uporządkowana, więc przed usunięciem szukamy maksimum liniowo.
     Node* maxNode = findMaxNode(&previous);
     Entry result = maxNode->entry;
 
@@ -61,13 +61,13 @@ LinkedListPriorityQueue<T, PriorityType>::peek() const {
         return std::nullopt;
     }
 
-    // Poniewaz lista nie jest posortowana, maksimum trzeba wyszukac liniowo.
+    // Ponieważ lista nie jest posortowana, maksimum trzeba wyszukać liniowo.
     return findMaxNode(nullptr)->entry;
 }
 
 template <typename T, typename PriorityType>
 bool LinkedListPriorityQueue<T, PriorityType>::modifyKey(const T& value, const PriorityType& newPriority) {
-    // Szukamy pierwszego wezla o podanej wartosci i zmieniamy tylko jego priorytet.
+    // Szukamy pierwszego węzła o podanej wartości i zmieniamy tylko jego priorytet.
     Node* node = findNode(value);
     if (node == nullptr) {
         return false;
@@ -79,13 +79,13 @@ bool LinkedListPriorityQueue<T, PriorityType>::modifyKey(const T& value, const P
 
 template <typename T, typename PriorityType>
 std::size_t LinkedListPriorityQueue<T, PriorityType>::size() const {
-    // Rozmiar przechowujemy na biezaco, bez potrzeby przechodzenia po calej liscie.
+    // Rozmiar przechowujemy na bieżąco, bez potrzeby przechodzenia po całej liście.
     return size_;
 }
 
 template <typename T, typename PriorityType>
 bool LinkedListPriorityQueue<T, PriorityType>::empty() const {
-    // Pusta kolejka to taka, w ktorej licznik elementow wynosi 0.
+    // Pusta kolejka to taka, w której licznik elementów wynosi 0.
     return size_ == 0;
 }
 
@@ -96,7 +96,7 @@ bool LinkedListPriorityQueue<T, PriorityType>::saveToCSV(const std::string& file
         return false;
     }
 
-    // Zapisujemy wszystkie wezly w kolejnosci przechodzenia po liscie.
+    // Zapisujemy wszystkie węzły w kolejności przechodzenia po liście.
     file << "value,priority,order\n";
     for (Node* current = head_; current != nullptr; current = current->next) {
         file << current->entry.value << ',' << current->entry.priority << ',' << current->entry.order << '\n';
@@ -112,7 +112,7 @@ bool LinkedListPriorityQueue<T, PriorityType>::loadFromCSV(const std::string& fi
         return false;
     }
 
-    // Najpierw usuwamy stary stan, potem budujemy nowa liste.
+    // Najpierw usuwamy stary stan, potem budujemy nową listę.
     clear();
 
     std::string line;
@@ -139,7 +139,7 @@ bool LinkedListPriorityQueue<T, PriorityType>::loadFromCSV(const std::string& fi
         valueStream >> value;
         priorityStream >> priority;
         if (!valueStream.fail() && !priorityStream.fail()) {
-            // Wczytane rekordy dopisujemy standardowa operacja insert.
+            // Wczytane rekordy dopisujemy standardową operacją insert.
             insert(value, priority);
         }
     }
@@ -151,7 +151,7 @@ template <typename T, typename PriorityType>
 void LinkedListPriorityQueue<T, PriorityType>::generateRandom(std::size_t count,
                                                               PriorityType minPriority,
                                                               PriorityType maxPriority) {
-    // Losowe dane maja zastapic cala dotychczasowa zawartosc kolejki.
+    // Losowe dane mają zastąpić całą dotychczasową zawartość kolejki.
     clear();
 
     std::random_device rd;
@@ -162,7 +162,7 @@ void LinkedListPriorityQueue<T, PriorityType>::generateRandom(std::size_t count,
         static_cast<long long>(maxPriority));
 
     for (std::size_t i = 0; i < count; ++i) {
-        // Podobnie jak w kopcu, losujemy wartosc i odpowiadajacy jej priorytet.
+        // Podobnie jak w kopcu, losujemy wartość i odpowiadający jej priorytet.
         insert(static_cast<T>(valueDistribution(generator)),
                static_cast<PriorityType>(priorityDistribution(generator)));
     }
@@ -171,7 +171,7 @@ void LinkedListPriorityQueue<T, PriorityType>::generateRandom(std::size_t count,
 template <typename T, typename PriorityType>
 typename LinkedListPriorityQueue<T, PriorityType>::Node*
 LinkedListPriorityQueue<T, PriorityType>::findNode(const T& value) const {
-    // Przechodzimy po liscie od poczatku do konca az trafimy na szukana wartosc.
+    // Przechodzimy po liście od początku do końca aż trafimy na szukaną wartość.
     for (Node* current = head_; current != nullptr; current = current->next) {
         if (current->entry.value == value) {
             return current;
@@ -184,12 +184,12 @@ LinkedListPriorityQueue<T, PriorityType>::findNode(const T& value) const {
 template <typename T, typename PriorityType>
 typename LinkedListPriorityQueue<T, PriorityType>::Node*
 LinkedListPriorityQueue<T, PriorityType>::findMaxNode(Node** previous) const {
-    // `best` przechowuje aktualnie najlepszy element znaleziony podczas przejscia.
+    // `best` przechowuje aktualnie najlepszy element znaleziony podczas przejścia.
     Node* best = head_;
     Node* bestPrevious = nullptr;
     Node* currentPrevious = nullptr;
 
-    // Przy rownych priorytetach wygrywa mniejsze `order`, czyli element dodany wczesniej.
+    // Przy równych priorytetach wygrywa mniejsze `order`, czyli element dodany wcześniej.
     for (Node* current = head_; current != nullptr; current = current->next) {
         if (hasHigherPriority(current->entry, best->entry)) {
             best = current;
@@ -199,7 +199,7 @@ LinkedListPriorityQueue<T, PriorityType>::findMaxNode(Node** previous) const {
     }
 
     if (previous != nullptr) {
-        // Dla extractMax potrzebujemy rowniez wskaznika na element poprzedzajacy maksimum.
+        // Dla extractMax potrzebujemy również wskaźnika na element poprzedzający maksimum.
         *previous = bestPrevious;
     }
 

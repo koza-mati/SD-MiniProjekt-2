@@ -9,16 +9,16 @@
 
 template <typename T, typename PriorityType>
 void BinaryHeapPriorityQueue<T, PriorityType>::clear() {
-    // Usuwamy cala zawartosc oraz zerujemy licznik kolejnosci wstawiania.
+    // Usuwamy całą zawartość oraz zerujemy licznik kolejności wstawiania.
     data_.clear();
     nextOrder_ = 0;
 }
 
 template <typename T, typename PriorityType>
 void BinaryHeapPriorityQueue<T, PriorityType>::insert(const T& value, const PriorityType& priority) {
-    // Tworzymy nowy wpis na koncu tablicy.
+    // Tworzymy nowy wpis na końcu tablicy.
     data_.push_back(Entry{value, priority, nextOrder_++});
-    // Po dodaniu element trafia na koniec tablicy i jest przesuwany w gore kopca.
+    // Po dodaniu element trafia na koniec tablicy i jest przesuwany w górę kopca.
     heapifyUp(data_.size() - 1);
 }
 
@@ -29,9 +29,9 @@ BinaryHeapPriorityQueue<T, PriorityType>::extractMax() {
         return std::nullopt;
     }
 
-    // W MAX-kopcu maksimum zawsze znajduje sie w korzeniu.
+    // W MAX-kopcu maksimum zawsze znajduje się w korzeniu.
     Entry result = data_.front();
-    // Korzen zastępujemy ostatnim elementem, a potem odtwarzamy wlasnosc kopca.
+    // Korzeń zastępujemy ostatnim elementem, a potem odtwarzamy własność kopca.
     data_.front() = data_.back();
     data_.pop_back();
 
@@ -49,13 +49,13 @@ BinaryHeapPriorityQueue<T, PriorityType>::peek() const {
         return std::nullopt;
     }
 
-    // Podejrzenie maksimum nie zmienia struktury, zwracamy tylko korzen.
+    // Podejrzenie maksimum nie zmienia struktury, zwracamy tylko korzeń.
     return data_.front();
 }
 
 template <typename T, typename PriorityType>
 bool BinaryHeapPriorityQueue<T, PriorityType>::modifyKey(const T& value, const PriorityType& newPriority) {
-    // Szukamy pierwszego elementu o zadanej wartosci.
+    // Szukamy pierwszego elementu o zadanej wartości.
     const std::size_t index = findIndexByValue(value);
     if (index == data_.size()) {
         return false;
@@ -64,7 +64,7 @@ bool BinaryHeapPriorityQueue<T, PriorityType>::modifyKey(const T& value, const P
     const PriorityType oldPriority = data_[index].priority;
     data_[index].priority = newPriority;
 
-    // Kierunek naprawy zalezy od tego, czy priorytet wzrosl czy zmalał.
+    // Kierunek naprawy zależy od tego, czy priorytet wzrósł czy zmalał.
     if (newPriority > oldPriority) {
         heapifyUp(index);
     } else if (newPriority < oldPriority) {
@@ -76,13 +76,13 @@ bool BinaryHeapPriorityQueue<T, PriorityType>::modifyKey(const T& value, const P
 
 template <typename T, typename PriorityType>
 std::size_t BinaryHeapPriorityQueue<T, PriorityType>::size() const {
-    // Rozmiar to po prostu liczba wpisow w tablicy kopca.
+    // Rozmiar to po prostu liczba wpisów w tablicy kopca.
     return data_.size();
 }
 
 template <typename T, typename PriorityType>
 bool BinaryHeapPriorityQueue<T, PriorityType>::empty() const {
-    // Kolejka jest pusta, gdy tablica nie zawiera zadnych elementow.
+    // Kolejka jest pusta, gdy tablica nie zawiera żadnych elementów.
     return data_.empty();
 }
 
@@ -93,7 +93,7 @@ bool BinaryHeapPriorityQueue<T, PriorityType>::saveToCSV(const std::string& file
         return false;
     }
 
-    // Zapisujemy caly stan wewnetrzny kopca, zeby mozna bylo go pozniej odtworzyc.
+    // Zapisujemy cały stan wewnętrzny kopca, żeby można było go później odtworzyć.
     file << "value,priority,order\n";
     for (const auto& entry : data_) {
         file << entry.value << ',' << entry.priority << ',' << entry.order << '\n';
@@ -109,7 +109,7 @@ bool BinaryHeapPriorityQueue<T, PriorityType>::loadFromCSV(const std::string& fi
         return false;
     }
 
-    // Wczytanie rozpoczynamy od wyczyszczenia starej zawartosci.
+    // Wczytanie rozpoczynamy od wyczyszczenia starej zawartości.
     clear();
 
     std::string line;
@@ -136,7 +136,7 @@ bool BinaryHeapPriorityQueue<T, PriorityType>::loadFromCSV(const std::string& fi
         valueStream >> value;
         priorityStream >> priority;
         if (!valueStream.fail() && !priorityStream.fail()) {
-            // Elementy odtwarzamy przez zwykle insert, zeby zachowac poprawnosc kopca.
+            // Elementy odtwarzamy przez zwykły insert, żeby zachować poprawność kopca.
             insert(value, priority);
         }
     }
@@ -148,7 +148,7 @@ template <typename T, typename PriorityType>
 void BinaryHeapPriorityQueue<T, PriorityType>::generateRandom(std::size_t count,
                                                               PriorityType minPriority,
                                                               PriorityType maxPriority) {
-    // Generowanie losowe tworzy nowa strukture od zera.
+    // Generowanie losowe tworzy nową strukturę od zera.
     clear();
 
     std::random_device rd;
@@ -159,7 +159,7 @@ void BinaryHeapPriorityQueue<T, PriorityType>::generateRandom(std::size_t count,
         static_cast<long long>(maxPriority));
 
     for (std::size_t i = 0; i < count; ++i) {
-        // Dla kazdego elementu losujemy zarowno wartosc, jak i priorytet.
+        // Dla każdego elementu losujemy zarówno wartość, jak i priorytet.
         insert(static_cast<T>(valueDistribution(generator)),
                static_cast<PriorityType>(priorityDistribution(generator)));
     }
@@ -167,7 +167,7 @@ void BinaryHeapPriorityQueue<T, PriorityType>::generateRandom(std::size_t count,
 
 template <typename T, typename PriorityType>
 void BinaryHeapPriorityQueue<T, PriorityType>::heapifyUp(std::size_t index) {
-    // Przesuwamy element w gore, dopoki ma wyzszy priorytet niz rodzic.
+    // Przesuwamy element w górę, dopóki ma wyższy priorytet niż rodzic.
     while (index > 0) {
         const std::size_t parent = (index - 1) / 2;
         if (!hasHigherPriority(data_[index], data_[parent])) {
@@ -181,13 +181,13 @@ void BinaryHeapPriorityQueue<T, PriorityType>::heapifyUp(std::size_t index) {
 
 template <typename T, typename PriorityType>
 void BinaryHeapPriorityQueue<T, PriorityType>::heapifyDown(std::size_t index) {
-    // Przesuwamy element w dol, dopoki ktorekolwiek dziecko powinno byc nad nim.
+    // Przesuwamy element w dół, dopóki którekolwiek dziecko powinno być nad nim.
     while (true) {
         const std::size_t left = index * 2 + 1;
         const std::size_t right = index * 2 + 2;
         std::size_t largest = index;
 
-        // W MAX-kopcu wybieramy dziecko o najwyzszym priorytecie.
+        // W MAX-kopcu wybieramy dziecko o najwyższym priorytecie.
         if (left < data_.size() && hasHigherPriority(data_[left], data_[largest])) {
             largest = left;
         }
@@ -197,7 +197,7 @@ void BinaryHeapPriorityQueue<T, PriorityType>::heapifyDown(std::size_t index) {
         }
 
         if (largest == index) {
-            // Jezeli rodzic nadal jest najlepszy, wlasnosc kopca zostala przywrocona.
+            // Jeżeli rodzic nadal jest najlepszy, własność kopca została przywrócona.
             break;
         }
 
@@ -208,7 +208,7 @@ void BinaryHeapPriorityQueue<T, PriorityType>::heapifyDown(std::size_t index) {
 
 template <typename T, typename PriorityType>
 std::size_t BinaryHeapPriorityQueue<T, PriorityType>::findIndexByValue(const T& value) const {
-    // To wyszukiwanie jest liniowe, bo kopiec porzadkuje po priorytecie, a nie po wartosci.
+    // To wyszukiwanie jest liniowe, bo kopiec porządkuje po priorytecie, a nie po wartości.
     for (std::size_t i = 0; i < data_.size(); ++i) {
         if (data_[i].value == value) {
             return i;

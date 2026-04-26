@@ -7,14 +7,14 @@
 #include "IPriorityQueue.hpp"
 
 /**
- * Klasa LinkedListPriorityQueue implementuje kolejke priorytetowa opartA o nieuporzadkowana liste jednokierunkowa.
- * Lista jest nieposortowana - wstawienie jest tanie, ale wyszukanie maksimum wymaga przejscia calej listy.
- * Przy rownych priorytetach FIFO zapewnia licznik `nextOrder_` (mniejszy order = wczesniej dodany).
- * Zlozonosci czasowe:
- * - insert:      O(1) (dodanie na poczatek listy)
+ * Klasa LinkedListPriorityQueue implementuje kolejkę priorytetową opartą o nieuporządkowaną listę jednokierunkową.
+ * Lista jest nieposortowana - wstawienie jest tanie, ale wyszukanie maksimum wymaga przejścia całej listy.
+ * Przy równych priorytetach FIFO zapewnia licznik `nextOrder_` (mniejszy order = wcześniej dodany).
+ * Złożoności czasowe:
+ * - insert:      O(1) (dodanie na początek listy)
  * - extractMax:  O(n) (przeszukanie listy w poszukiwaniu maksimum)
- * - peek:        O(n) (jak wyzej, bez usuwania)
- * - modifyKey:   O(n) (liniowe wyszukiwanie wezla)
+ * - peek:        O(n) (jak wyżej, bez usuwania)
+ * - modifyKey:   O(n) (liniowe wyszukiwanie węzła)
  * - size/empty:  O(1)
  * - clear:       O(n)
  */
@@ -24,36 +24,36 @@ public:
     using Entry = typename IPriorityQueue<T, PriorityType>::Entry;
 
     LinkedListPriorityQueue() = default;                                              // konstruktor - O(1)
-    ~LinkedListPriorityQueue() override;                                              // destruktor zwalniajacy wezly - O(n)
+    ~LinkedListPriorityQueue() override;                                              // destruktor zwalniający węzły - O(n)
 
-    LinkedListPriorityQueue(const LinkedListPriorityQueue&) = delete;                 // brak kopiowania (recznie zarzadzana pamiec)
-    LinkedListPriorityQueue& operator=(const LinkedListPriorityQueue&) = delete;      // brak przypisania kopiujacego
+    LinkedListPriorityQueue(const LinkedListPriorityQueue&) = delete;                 // brak kopiowania (ręcznie zarządzana pamięć)
+    LinkedListPriorityQueue& operator=(const LinkedListPriorityQueue&) = delete;      // brak przypisania kopiującego
 
-    void clear() override;                                                            // zwolnienie wszystkich wezlow - O(n)
-    void insert(const T& value, const PriorityType& priority) override;               // wstawienie na poczatek listy - O(1)
-    std::optional<Entry> extractMax() override;                                       // pobranie i usuniecie max - O(n)
-    std::optional<Entry> peek() const override;                                       // podglad maksimum bez usuwania - O(n)
+    void clear() override;                                                            // zwolnienie wszystkich węzłów - O(n)
+    void insert(const T& value, const PriorityType& priority) override;               // wstawienie na początek listy - O(1)
+    std::optional<Entry> extractMax() override;                                       // pobranie i usunięcie max - O(n)
+    std::optional<Entry> peek() const override;                                       // podgląd maksimum bez usuwania - O(n)
     bool modifyKey(const T& value, const PriorityType& newPriority) override;         // zmiana priorytetu elementu - O(n)
-    std::size_t size() const override;                                                // liczba elementow - O(1)
+    std::size_t size() const override;                                                // liczba elementów - O(1)
     bool empty() const override;                                                      // czy lista pusta - O(1)
     bool saveToCSV(const std::string& filename) const override;                       // zapis do pliku CSV - O(n)
     bool loadFromCSV(const std::string& filename) override;                           // wczytanie z pliku CSV - O(n)
-    void generateRandom(std::size_t count, PriorityType minPriority, PriorityType maxPriority) override; // losowe wypelnienie - O(n)
+    void generateRandom(std::size_t count, PriorityType minPriority, PriorityType maxPriority) override; // losowe wypełnienie - O(n)
 
 private:
     struct Node {
-        // Kazdy wezel listy przechowuje jeden wpis kolejki i wskaznik na nastepny element.
-        Entry entry;             // wartosc + priorytet + order (FIFO)
-        Node* next = nullptr;    // wskaznik na kolejny wezel lub nullptr na koncu listy
+        // Każdy węzeł listy przechowuje jeden wpis kolejki i wskaźnik na następny element.
+        Entry entry;             // wartość + priorytet + order (FIFO)
+        Node* next = nullptr;    // wskaźnik na kolejny węzeł lub nullptr na końcu listy
     };
 
-    // Lista jest nieuporzadkowana, dzieki czemu wstawienie jest bardzo proste.
-    Node* head_ = nullptr;          // wskaznik na pierwszy wezel listy
-    std::size_t size_ = 0;          // aktualna liczba wezlow w liscie
-    std::size_t nextOrder_ = 0;     // monotonicznie rosnacy licznik dla porzadku FIFO
+    // Lista jest nieuporządkowana, dzięki czemu wstawienie jest bardzo proste.
+    Node* head_ = nullptr;          // wskaźnik na pierwszy węzeł listy
+    std::size_t size_ = 0;          // aktualna liczba węzłów w liście
+    std::size_t nextOrder_ = 0;     // monotonicznie rosnący licznik dla porządku FIFO
 
-    Node* findNode(const T& value) const;                  // wyszukiwanie wezla po wartosci - O(n)
-    Node* findMaxNode(Node** previous) const;              // wyszukiwanie wezla o najwyzszym priorytecie - O(n)
+    Node* findNode(const T& value) const;                  // wyszukiwanie węzła po wartości - O(n)
+    Node* findMaxNode(Node** previous) const;              // wyszukiwanie węzła o najwyższym priorytecie - O(n)
 };
 
 #include "LinkedListPriorityQueue.tpp"
