@@ -3,8 +3,8 @@
 #include <cstddef>
 #include <optional>
 #include <string>
-#include <vector>
 
+#include "DynamicArray.hpp"
 #include "IPriorityQueue.hpp"
 
 /**
@@ -40,7 +40,7 @@ public:
 private:
     // Kopiec przechowywany jest w tablicy zgodnie z klasyczną reprezentacją:
     // parent = (i - 1) / 2, left = 2*i + 1, right = 2*i + 2.
-    std::vector<Entry> data_;       // bufor elementów kopca w układzie tablicowym
+    DynamicArray<Entry> data_;      // bufor elementów kopca w układzie tablicowym (własna implementacja)
     // Licznik kolejności dodawania potrzebny do FIFO przy równych priorytetach.
     std::size_t nextOrder_ = 0;     // monotonicznie rosnący licznik dla porządku FIFO
 
