@@ -29,7 +29,7 @@ private:
     }
 
 public:
-    DynamicArray() : data_(new T[1]), size_(0), capacity_(1) {}
+    DynamicArray() : data_(nullptr), size_(0), capacity_(0) {}
 
     ~DynamicArray() { delete[] data_; }
 
