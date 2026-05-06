@@ -1,6 +1,6 @@
 # SD-MiniProjekt-2
 
-Projekt z kursu Struktury Danych: kolejka priorytetowa typu MAX w C++. Program udostępnia dwie implementacje tej samej struktury (kopiec binarny oraz listę jednokierunkową), menu konsolowe oraz moduł pomiarów wydajności zapisywanych do plików CSV i TXT.
+Projekt z kursu Struktury Danych: kolejka priorytetowa typu MAX w C++. Program udostępnia dwie implementacje (kopiec binarny oraz listę jednokierunkową) tej samej struktury, menu konsolowe oraz moduł pomiarów wydajności zapisywanych do plików CSV i TXT.
 
 ## Cel projektu
 
@@ -28,7 +28,7 @@ Zaimplementowane operacje:
 
 Projekt jest napisany w C++20. Wykorzystuje standardową bibliotekę C++ m.in. do strumieni plikowych, pomiaru czasu, generowania liczb losowych, `std::optional`, `std::string` i `std::vector` w benchmarkach.
 
-Kod korzysta również z `windows.h` oraz `system("cls")`, dlatego menu jest przygotowane z myślą o uruchamianiu w konsoli Windows.
+Kod korzysta również z `windows.h` oraz `system("cls")`.
 
 Implementacje kolejek są klasami szablonowymi rozdzielonymi na pliki `.hpp` i `.tpp`.
 
@@ -55,11 +55,11 @@ Element kolejki jest reprezentowany przez `PriorityQueueEntry<T, PriorityType>`:
 - `priority` - priorytet; im większa wartość, tym wyższy priorytet,
 - `order` - numer kolejności wstawienia.
 
-Funkcja `hasHigherPriority()` najpierw porównuje `priority`, a przy remisie wybiera wpis z mniejszym `order`. Dzięki temu elementy o takim samym priorytecie są obsługiwane zgodnie z FIFO.
+Funkcja `hasHigherPriority()` najpierw porównuje `priority`, a przy remisie wybiera wpis z mniejszym `order`. Dzięki temu elementy o takim samym priorytecie są obsługiwane zgodnie z zasadą FIFO.
 
 ## DynamicArray i pojemność bufora
 
-Kopiec binarny nie korzysta z `std::vector`, tylko z własnej klasy `DynamicArray`. Klasa przechowuje trzy pola:
+Kopiec binarny korzysta z własnej klasy `DynamicArray`. Klasa przechowuje trzy pola:
 
 - `data_` - wskaźnik na zaalokowany bufor,
 - `size_` - liczba faktycznie zapisanych elementów,
@@ -73,7 +73,7 @@ W naszym kodzie `capacity_` ma więc zadanie organizacyjne i wydajnościowe: kon
 
 ## Implementacja: kopiec binarny
 
-`BinaryHeapPriorityQueue` implementuje kolejkę jako kopiec binarny typu MAX. W przeciwieństwie do typowej implementacji ze `std::vector`, kopiec w tym projekcie korzysta z własnej klasy `DynamicArray`.
+`BinaryHeapPriorityQueue` implementuje kolejkę jako kopiec binarny typu MAX. Kopiec korzysta z własnej implementacji klasy `DynamicArray`.
 
 Dla indeksu `i`:
 
@@ -247,15 +247,6 @@ Git Bash / MSYS / podobne środowisko:
 ```bash
 ./app.exe
 ```
-
-## Najważniejsze decyzje projektowe
-
-- obie implementacje realizują wspólny interfejs `IPriorityQueue`,
-- kopiec używa własnej tablicy dynamicznej `DynamicArray`,
-- lista jest nieuporządkowana, co daje szybkie `insert`, ale wolniejsze `peek` i `extractMax`,
-- przy równych priorytetach obie struktury stosują FIFO przez pole `order`,
-- `modifyKey` zmienia pierwszy znaleziony element o wskazanej wartości,
-- menu i benchmarki pracują na tych samych publicznych operacjach interfejsu.
 
 ## Podsumowanie
 
