@@ -1,198 +1,183 @@
 # SD-MiniProjekt-2
 
-Projekt z kursu Struktury Danych przedstawiający implementację kolejki priorytetowej typu MAX w języku C++. W projekcie zaimplementowano dwie różne struktury realizujące ten sam abstrakcyjny typ danych, przygotowano menu tekstowe do obsługi operacji oraz moduł badań wydajnościowych zapisujący wyniki do plików CSV.
+Projekt z kursu Struktury Danych: kolejka priorytetowa typu MAX w C++. Program udostepnia dwie implementacje tej samej struktury, menu konsolowe oraz modul pomiarow wydajnosci zapisywanych do plikow CSV i TXT.
 
 ## Cel projektu
 
 Celem projektu jest:
 
 - implementacja kolejki priorytetowej typu MAX,
-- porównanie dwóch różnych reprezentacji tej samej struktury danych,
-- wykonanie pomiarów czasu działania podstawowych operacji,
-- zapis wyników badań do plików tekstowych i CSV.
+- porownanie dwoch reprezentacji tej samej struktury danych,
+- obsluga podstawowych operacji kolejki priorytetowej przez wspolny interfejs,
+- wykonanie pomiarow czasu dzialania operacji dla roznych rozmiarow danych,
+- zapis i odczyt stanu kolejki z plikow CSV.
 
-Zgodnie z treścią zadania zaimplementowano operacje:
+Zaimplementowane operacje:
 
-- `insert(e, p)` - dodanie elementu `e` o priorytecie `p`,
-- `extract-max()` - usunięcie i zwrócenie elementu o najwyższym priorytecie,
-- `find-max()` / `peek()` - podejrzenie elementu o najwyższym priorytecie bez usuwania,
-- `modify-key(e, p)` - zmiana priorytetu wybranego elementu,
-- `return-size` - zwrócenie liczby elementów w strukturze.
+- `insert(e, p)` - dodaje element `e` o priorytecie `p`,
+- `extractMax()` / `extract-max()` - usuwa i zwraca element o najwyzszym priorytecie,
+- `peek()` / `find-max()` - zwraca element o najwyzszym priorytecie bez usuwania,
+- `modifyKey(e, p)` / `modify-key(e, p)` - zmienia priorytet pierwszego znalezionego elementu o wartosci `e`,
+- `size()` / `return-size` - zwraca liczbe elementow,
+- `empty()` - sprawdza, czy kolejka jest pusta,
+- `clear()` - usuwa wszystkie elementy,
+- `saveToCSV()` i `loadFromCSV()` - zapis i odczyt danych,
+- `generateRandom()` - wypelnienie struktury losowymi danymi.
 
-## Użyte technologie
+## Technologie i ograniczenia
 
-Projekt został napisany w:
+Projekt jest napisany w C++20. Wykorzystuje standardowa biblioteke C++ m.in. do strumieni plikowych, pomiaru czasu, generowania liczb losowych, `std::optional`, `std::string` i `std::vector` w benchmarkach.
 
-- `C++20`
-- biblioteka standardowa C++ (`vector`, `optional`, `fstream`, `chrono`, `random`, `string`, `limits`)
-- `windows.h` wykorzystywane jedynie do wygodnej pracy z menu konsolowym na Windows
+Kod korzysta rowniez z `windows.h` oraz `system("cls")`, dlatego menu jest przygotowane z mysla o uruchamianiu w konsoli Windows.
 
-Kod jest podzielony na pliki nagłówkowe `hpp`, plik implementacyjny `cpp` dla warstwy aplikacyjnej oraz pliki `tpp` dla implementacji klas szablonowych.
+Implementacje kolejek sa klasami szablonowymi rozdzielonymi na pliki `.hpp` i `.tpp`.
 
-## Zawartość projektu
+## Struktura projektu
 
-Struktura katalogu `src/`:
+Katalog `src/` zawiera:
 
-- `main.cpp` - punkt startowy programu
-- `menu.hpp` - deklaracje funkcji menu
-- `menu.cpp` - obsługa menu, zapis CSV oraz benchmarki
-- `IPriorityQueue.hpp` - wspólny interfejs kolejek priorytetowych
-- `PriorityQueueCommon.hpp` - wspólne definicje wpisu kolejki i porównywania priorytetów
-- `BinaryHeapPriorityQueue.hpp` - deklaracja kolejki priorytetowej opartej na kopcu
-- `BinaryHeapPriorityQueue.tpp` - implementacja kolejki na kopcu binarnym
-- `LinkedListPriorityQueue.hpp` - deklaracja kolejki priorytetowej opartej na liście jednokierunkowej
-- `LinkedListPriorityQueue.tpp` - implementacja kolejki na liście jednokierunkowej
+- `main.cpp` - punkt startowy programu,
+- `menu.hpp` - deklaracje funkcji menu i benchmarkow,
+- `menu.cpp` - menu konsolowe, zapis/odczyt CSV z poziomu programu oraz benchmarki,
+- `IPriorityQueue.hpp` - wspolny interfejs kolejki priorytetowej,
+- `PriorityQueueCommon.hpp` - wspolna struktura wpisu i porownywanie priorytetow,
+- `DynamicArray.hpp` - wlasna tablica dynamiczna uzywana przez kopiec,
+- `BinaryHeapPriorityQueue.hpp` - deklaracja kolejki opartej na kopcu binarnym,
+- `BinaryHeapPriorityQueue.tpp` - implementacja kolejki na kopcu binarnym,
+- `LinkedListPriorityQueue.hpp` - deklaracja kolejki opartej na liscie jednokierunkowej,
+- `LinkedListPriorityQueue.tpp` - implementacja kolejki na liscie jednokierunkowej.
 
-## Wspólny model danych
+## Wspolny model danych
 
-Każdy element kolejki jest reprezentowany przez strukturę:
+Element kolejki jest reprezentowany przez `PriorityQueueEntry<T, PriorityType>`:
 
-- `value` - przechowywana wartość,
-- `priority` - priorytet elementu,
-- `order` - numer kolejności wstawienia.
+- `value` - przechowywana wartosc,
+- `priority` - priorytet; im wieksza wartosc, tym wyzszy priorytet,
+- `order` - numer kolejnosci wstawienia.
 
-Pole `order` zostało dodane po to, aby przy równych priorytetach zachować zasadę FIFO. Oznacza to, że jeśli dwa elementy mają ten sam priorytet, jako "lepszy" traktowany jest ten, który został dodany wcześniej.
+Funkcja `hasHigherPriority()` najpierw porownuje `priority`, a przy remisie wybiera wpis z mniejszym `order`. Dzieki temu elementy o takim samym priorytecie sa obslugiwane zgodnie z FIFO.
 
-## Implementacja 1 - kopiec binarny
+## DynamicArray i pojemnosc bufora
 
-Pierwsza implementacja kolejki priorytetowej korzysta z kopca binarnego typu MAX.
+Kopiec binarny nie korzysta z `std::vector`, tylko z wlasnej klasy `DynamicArray`. Klasa przechowuje trzy pola:
 
-### Reprezentacja
+- `data_` - wskaznik na zaalokowany bufor,
+- `size_` - liczba faktycznie zapisanych elementow,
+- `capacity_` - pojemnosc bufora, czyli liczba elementow, ktore moga zmiescic sie w aktualnie zaalokowanej tablicy bez ponownej alokacji pamieci.
 
-Kopiec jest przechowywany w tablicy dynamicznej (`std::vector`). Dla indeksu `i`:
+`capacity_` nie oznacza liczby elementow w kolejce. Liczbe elementow zwraca `size()`, ktore korzysta z `size_`. Pojemnosc jest zapasem pamieci potrzebnym po to, aby nie tworzyc nowej tablicy przy kazdym pojedynczym `insert`.
 
-- rodzic znajduje się pod indeksem `(i - 1) / 2`,
+Gdy `pushBack()` chce dodac element, a `size_ >= capacity_`, wywolywana jest metoda `grow()`. Tworzy ona nowy bufor o dwukrotnie wiekszej pojemnosci, kopiuje do niego dotychczasowe elementy, zwalnia stary bufor i aktualizuje `capacity_`. Dzieki temu pojedyncze rozszerzenie jest kosztowne, ale zdarza sie rzadko, a dodawanie na koniec tablicy ma zlozonosc amortyzowana `O(1)`.
+
+W naszym kodzie `capacity_` ma wiec zadanie organizacyjne i wydajnosciowe: kontroluje, kiedy trzeba powiekszyc bufor kopca, oraz ogranicza liczbe realokacji pamieci podczas wielu operacji `insert`.
+
+## Implementacja: kopiec binarny
+
+`BinaryHeapPriorityQueue` implementuje kolejke jako kopiec binarny typu MAX. W przeciwienstwie do typowej implementacji ze `std::vector`, kopiec w tym projekcie korzysta z wlasnej klasy `DynamicArray`.
+
+Dla indeksu `i`:
+
+- rodzic znajduje sie pod indeksem `(i - 1) / 2`,
 - lewe dziecko pod `2 * i + 1`,
 - prawe dziecko pod `2 * i + 2`.
 
-### Działanie operacji
+Dzialanie operacji:
 
-- `insert` - dodaje element na koniec tablicy i wykonuje `heapifyUp`
-- `extractMax` - usuwa korzeń, przenosi ostatni element na początek i wykonuje `heapifyDown`
-- `peek` - zwraca element z korzenia kopca
-- `modifyKey` - zmienia priorytet wskazanego elementu i naprawia kopiec w górę lub w dół
-- `size` - zwraca liczbę elementów w wektorze
+- `insert` dodaje element na koniec tablicy i wykonuje `heapifyUp`,
+- `extractMax` usuwa korzen, przenosi ostatni element na poczatek i wykonuje `heapifyDown`,
+- `peek` zwraca korzen kopca,
+- `modifyKey` liniowo szuka pierwszego elementu o podanej wartosci, zmienia priorytet i naprawia kopiec w gore albo w dol,
+- `clear` zeruje rozmiar tablicy i licznik `nextOrder_`.
 
-### Złożoność
+Zlozonosc:
 
-- `insert` - `O(log n)`
-- `extractMax` - `O(log n)`
-- `peek` - `O(1)`
-- `modifyKey` - `O(n)` na znalezienie elementu + `O(log n)` na naprawę kopca
-- `size` - `O(1)`
+- `insert` - `O(log n)`,
+- `extractMax` - `O(log n)`,
+- `peek` - `O(1)`,
+- `modifyKey` - `O(n)` na wyszukanie + `O(log n)` na naprawe kopca,
+- `size` / `empty` - `O(1)`,
+- `saveToCSV` - `O(n)`,
+- `loadFromCSV` - `O(n log n)`, bo elementy sa wczytywane przez `insert`.
 
-## Implementacja 2 - lista jednokierunkowa
+## Implementacja: lista jednokierunkowa
 
-Druga implementacja kolejki priorytetowej wykorzystuje nieuporządkowaną listę jednokierunkową.
+`LinkedListPriorityQueue` implementuje kolejke jako nieuporzadkowana liste jednokierunkowa. Nowy element jest dodawany na poczatek listy, a maksimum jest wyszukiwane dopiero przy `peek` albo `extractMax`.
 
-### Reprezentacja
+Kazdy wezel przechowuje:
 
-Każdy węzeł przechowuje:
+- jeden `PriorityQueueEntry`,
+- wskaznik na nastepny wezel.
 
-- jeden wpis kolejki,
-- wskaźnik na następny element.
+Dzialanie operacji:
 
-Nowe elementy dodawane są zawsze na początek listy.
+- `insert` tworzy nowy wezel na poczatku listy,
+- `extractMax` liniowo wyszukuje najlepszy wezel, odpina go i zwraca jego dane,
+- `peek` liniowo wyszukuje najlepszy wezel bez usuwania,
+- `modifyKey` liniowo szuka pierwszego elementu o podanej wartosci i zmienia jego priorytet,
+- `clear` iteracyjnie zwalnia wszystkie wezly.
 
-### Działanie operacji
+Zlozonosc:
 
-- `insert` - wstawia nowy element na początek listy
-- `extractMax` - przeszukuje listę liniowo, znajduje maksimum i usuwa odpowiedni węzeł
-- `peek` - przeszukuje listę liniowo i zwraca element o najwyższym priorytecie
-- `modifyKey` - wyszukuje pierwszy element o podanej wartości i zmienia jego priorytet
-- `size` - zwraca aktualny licznik elementów
+- `insert` - `O(1)`,
+- `extractMax` - `O(n)`,
+- `peek` - `O(n)`,
+- `modifyKey` - `O(n)`,
+- `size` / `empty` - `O(1)`,
+- `saveToCSV` - `O(n)`,
+- `loadFromCSV` - `O(n)`.
 
-### Złożoność
+## Menu programu
 
-- `insert` - `O(1)`
-- `extractMax` - `O(n)`
-- `peek` - `O(n)`
-- `modifyKey` - `O(n)`
-- `size` - `O(1)`
+Po uruchomieniu programu dostepne jest menu glowne:
 
-## Interfejs programu
+1. kopiec binarny MAX,
+2. kolejka priorytetowa na liscie jednokierunkowej,
+3. badania wydajnosciowe i zapis CSV,
+4. wyjscie.
 
-Program uruchamia menu tekstowe w konsoli. Użytkownik może:
+W menu konkretnej struktury mozna:
 
-- wybrać implementację opartą na kopcu,
-- wybrać implementację opartą na liście,
-- wykonać badania wydajnościowe,
-- zakończyć program.
+- dodac element z priorytetem,
+- usunac maksimum,
+- podejrzec maksimum,
+- zmienic priorytet elementu,
+- sprawdzic rozmiar,
+- zapisac aktualny stan do CSV,
+- wczytac dane z pliku CSV,
+- wygenerowac losowe dane,
+- wyczyscic strukture.
 
-Dla każdej implementacji dostępne są operacje:
+Po operacjach modyfikujacych program automatycznie zapisuje stan pomocniczy:
 
-- dodanie elementu z priorytetem,
-- usunięcie maksimum,
-- podejrzenie maksimum,
-- zmiana priorytetu,
-- odczyt rozmiaru,
-- zapis aktualnego stanu do CSV,
-- wczytanie danych z CSV,
-- losowe wygenerowanie danych,
-- wyczyszczenie struktury.
+- `kopiec_autosave.csv` dla kopca,
+- `lista_autosave.csv` dla listy.
+
+Reczny zapis z menu tworzy:
+
+- `kopiec.csv` dla kopca,
+- `lista.csv` dla listy.
 
 ## Generowanie danych
 
-Losowe dane generowane są osobno dla obu implementacji.
+Metoda `generateRandom(count, minPriority, maxPriority)` czysci aktualna strukture i tworzy `count` nowych elementow.
 
-Przyjęto, że:
+W menu priorytety sa losowane z zakresu:
 
-- wartości elementów są losowane z dodatniego zakresu liczb całkowitych,
-- priorytety są losowane z zakresu większego niż rozmiar struktury,
-- w menu generowanie odbywa się z zakresu `1` do `size * 5 + 10`.
+```text
+1 .. size * 5 + 10
+```
 
-To spełnia założenie z treści projektu, że zakres priorytetów powinien być kilkukrotnie większy od liczby elementów.
+Wartosci elementow sa losowane z zakresu:
 
-## FIFO przy równych priorytetach
+```text
+1 .. count * 10 + 100
+```
 
-W projekcie przyjęto zasadę FIFO dla elementów o tym samym priorytecie.
-
-Realizacja:
-
-- każdy element otrzymuje numer `order`,
-- podczas porównania najpierw sprawdzany jest `priority`,
-- jeśli priorytety są równe, wyżej oceniany jest element z mniejszym `order`.
-
-Takie rozwiązanie działa tak samo dla kopca i dla implementacji listowej.
-
-## Badania wydajnościowe
-
-Program zawiera moduł benchmarków porównujący obie implementacje.
-
-### Mierzone operacje
-
-- `insert`
-- `extractMax`
-- `peek`
-- `increaseKey`
-- `decreaseKey`
-- `returnSize`
-
-### Sposób pomiaru
-
-- pomiary wykonywane są dla kilku rozmiarów struktur,
-- dla każdego rozmiaru każda operacja jest wykonywana 100 razy,
-- każdy pomiar startuje od nowo zbudowanej struktury o tym samym rozmiarze,
-- dane testowe są generowane deterministycznie na podstawie ziarna (`seed`),
-- na koniec zapisywana jest średnia wartość czasu w nanosekundach.
-
-### Pliki wynikowe
-
-Po uruchomieniu benchmarków program tworzy:
-
-- `pomiary.txt` - zbiorcze zestawienie wyników
-- `benchmark_kopiec.csv` - wyniki dla kopca binarnego
-- `benchmark_lista.csv` - wyniki dla implementacji listowej
-- `seedy_100000.txt` - zapis przykładowych ziaren losowania
+Do generowania uzywane sa `std::random_device`, `std::mt19937` i `std::uniform_int_distribution`.
 
 ## Zapis i odczyt CSV
 
-Obie implementacje potrafią:
-
-- zapisać aktualny stan kolejki do pliku CSV,
-- odczytać dane z pliku CSV i odbudować strukturę.
-
-Format zapisu:
+Obie implementacje zapisuja pliki w formacie:
 
 ```csv
 value,priority,order
@@ -201,45 +186,77 @@ value,priority,order
 15,45,2
 ```
 
+Wazna uwaga: obecna implementacja `loadFromCSV()` odczytuje z pliku tylko `value` i `priority`, a nastepnie odbudowuje strukture przez `insert`. Kolumna `order` jest zapisywana, ale nie jest odtwarzana przy wczytywaniu. Po wczytaniu elementy dostaja nowe numery `order` zgodnie z kolejnoscia rekordow w pliku.
+
+## Badania wydajnosciowe
+
+Benchmarki sa uruchamiane z menu glownego przez opcje `Badania wydajnosciowe i zapis CSV`.
+
+Mierzone operacje:
+
+- `insert`,
+- `extractMax`,
+- `peek`,
+- `increaseKey`,
+- `decreaseKey`,
+- `returnSize`.
+
+Rozmiary struktur uzywane w benchmarkach:
+
+```text
+10000, 20000, 40000, 80000, 100000, 160000, 320000, 640000
+```
+
+Dla kazdego rozmiaru kazda operacja jest mierzona 100 razy. Przed pojedynczym pomiarem tworzona jest nowa struktura wypelniona tym samym zestawem danych dla danej proby. Dane testowe sa generowane deterministycznie na podstawie funkcji `benchmarkSeed(size, attempt)`.
+
+Pliki wynikowe:
+
+- `pomiary.txt` - zbiorcze zestawienie wynikow,
+- `benchmark_kopiec.csv` - wyniki dla kopca binarnego,
+- `benchmark_lista.csv` - wyniki dla listy jednokierunkowej,
+- `seedy_100000.txt` - lista seedow dla rozmiaru 100000.
+
+Format plikow CSV z benchmarkami:
+
+```csv
+Operation,Size,AverageTime_ns
+insert,10000,123
+extractMax,10000,456
+```
+
 ## Kompilacja
 
-Przykładowa komenda kompilacji:
+Przykladowa komenda kompilacji:
 
 ```bash
 g++ -std=c++20 -Wall -Wextra -pedantic -I src src/main.cpp src/menu.cpp -o app.exe
 ```
 
+Na Windows mozna tez nazwac plik wynikowy bez rozszerzenia, ale obecny katalog projektu zawiera artefakt `app.exe`.
+
 ## Uruchomienie
 
-Po kompilacji program można uruchomić poleceniem:
-
-```bash
-./app.exe
-```
-
-lub w systemie Windows:
+Windows:
 
 ```bash
 app.exe
 ```
 
-## Najważniejsze decyzje projektowe
+Git Bash / MSYS / podobne srodowisko:
 
-- zastosowano dwie różne reprezentacje kolejki priorytetowej, aby można było porównać ich zachowanie
-- jedna z implementacji to kopiec binarny, zgodnie z wymaganiami projektu
-- dla równych priorytetów przyjęto FIFO
-- interfejs kolejek został ujednolicony przez `IPriorityQueue`
-- menu i benchmarki korzystają z tych samych operacji dla obu struktur
+```bash
+./app.exe
+```
+
+## Najwazniejsze decyzje projektowe
+
+- obie implementacje realizuja wspolny interfejs `IPriorityQueue`,
+- kopiec uzywa wlasnej tablicy dynamicznej `DynamicArray`,
+- lista jest nieuporzadkowana, co daje szybkie `insert`, ale wolniejsze `peek` i `extractMax`,
+- przy rownych priorytetach obie struktury stosuja FIFO przez pole `order`,
+- `modifyKey` zmienia pierwszy znaleziony element o wskazanej wartosci,
+- menu i benchmarki pracuja na tych samych publicznych operacjach interfejsu.
 
 ## Podsumowanie
 
-Projekt realizuje wymagania miniprojektu dotyczące kolejki priorytetowej typu MAX. Zawiera:
-
-- dwie implementacje kolejki priorytetowej,
-- obsługę wszystkich wymaganych operacji,
-- generowanie danych losowych,
-- pomiary wydajności,
-- zapis wyników do plików CSV i TXT,
-- czytelny podział na pliki odpowiedzialne za konkretne elementy systemu.
-
-Projekt może służyć zarówno jako rozwiązanie zadania laboratoryjnego, jak i jako materiał do porównania kosztów operacji w różnych implementacjach kolejki priorytetowej.
+Projekt realizuje kolejke priorytetowa typu MAX w dwoch wariantach: przez kopiec binarny oraz przez nieuporzadkowana liste jednokierunkowa. Zawiera menu konsolowe, losowe generowanie danych, zapis/odczyt CSV oraz benchmarki porownujace koszty podstawowych operacji.
