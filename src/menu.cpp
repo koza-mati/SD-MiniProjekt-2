@@ -22,16 +22,16 @@ using ListQueue = LinkedListPriorityQueue<int, int>;
 
 namespace menu_utils {
 using Clock = std::chrono::high_resolution_clock;
-// Kazda operacje mierzymy 100 razy i liczymy srednia.
+// Każdą operację mierzymy 100 razy i liczymy średnią.
 constexpr int kBenchmarkAttempts = 100;
 
 unsigned int benchmarkSeed(int size, int attempt) {
-    // Deterministyczny seed pozwala odtwarzac te same dane testowe.
+    // Deterministyczny seed pozwala odtwarzać te same dane testowe.
     return 123456u + static_cast<unsigned int>(size) * 7919u + static_cast<unsigned int>(attempt) * 131u;
 }
 
 std::vector<int> generateBenchmarkData(int size, int operations, unsigned int seed) {
-    // Generujemy jeden bufor liczb, z ktorego korzysta pozniej benchmark.
+    // Generujemy jeden bufor liczb, z którego korzysta później benchmark.
     std::mt19937 generator(seed);
     std::uniform_int_distribution<int> distribution(1, 100000000);
     std::vector<int> data;
@@ -45,13 +45,13 @@ std::vector<int> generateBenchmarkData(int size, int operations, unsigned int se
 }
 
 const std::vector<int>& benchmarkSizes() {
-    // Zestaw rozmiarow, dla ktorych beda wykonywane pomiary.
+    // Zestaw rozmiarów, dla których będą wykonywane pomiary.
     static const std::vector<int> sizes = {10000, 20000, 40000, 80000, 100000, 160000, 320000, 640000};
     return sizes;
 }
 
 void clearConsole() {
-    // Czyszczenie ekranu poprawia czytelnosc pracy z menu w konsoli Windows.
+    // Czyszczenie ekranu poprawia czytelność pracy z menu w konsoli Windows.
     system("cls");
 }
 
@@ -64,7 +64,7 @@ int readInt(const std::string& prompt) {
             return value;
         }
 
-        // Przy blednym wejsciu kasujemy blad strumienia i odrzucamy pozostale znaki.
+        // Przy błędnym wejściu kasujemy błąd strumienia i odrzucamy pozostałe znaki.
         std::cin.clear();
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         std::cout << "Niepoprawna wartosc. Sprobuj ponownie.\n";
@@ -72,7 +72,7 @@ int readInt(const std::string& prompt) {
 }
 
 void writeSeedsForSize(const std::string& filename, int size) {
-    // Zapis seedow do pliku pomaga udokumentowac sposob generowania danych.
+    // Zapis seedów do pliku pomaga udokumentować sposób generowania danych.
     std::ofstream seedFile(filename, std::ios::trunc);
     if (!seedFile.is_open()) {
         std::cerr << "Blad otwarcia pliku seedow: " << filename << '\n';
@@ -90,7 +90,7 @@ void appendMeasurement(std::ofstream& txtFile,
                        const std::string& operationName,
                        int size,
                        long long averageTimeNs) {
-    // Jeden wiersz podsumowujacy pojedyncza operacje dla danego rozmiaru.
+    // Jeden wiersz podsumowujący pojedynczą operację dla danego rozmiaru.
     txtFile << structureName << ';' << operationName << ';' << size << ';' << averageTimeNs << '\n';
 }
 
@@ -113,7 +113,7 @@ void printEntry(const std::optional<typename Queue::Entry>& entry) {
 
 template <typename Queue>
 void fillQueueForBenchmark(Queue& queue, const std::vector<int>& values, int size) {
-    // Pierwsza polowa danych staje sie wartosciami, druga polowa ich priorytetami.
+    // Pierwsza połowa danych staje się wartościami, druga połowa ich priorytetami.
     for (int i = 0; i < size; ++i) {
         queue.insert(values[i], values[size + i]);
     }
@@ -145,8 +145,19 @@ void benchmarkQueue(const std::string& structureName, const std::string& results
         long long sumModifyKeyDecrease = 0;
         long long sumSize = 0;
 
+        // Każdy pomiar startuje od świeżo zbudowanej struktury o tym samym rozmiarze N,
+        // dzięki czemu kolejne operacje nie wpływają na siebie wzajemnie.
+        const auto measureOperation = [&](const std::vector<int>& values, auto&& operation) {
+            Queue queue;
+            fillQueueForBenchmark(queue, values, size);
+            const auto start = Clock::now();
+            operation(queue);
+            const auto end = Clock::now();
+            return std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
+        };
+
         for (int attempt = 0; attempt < kBenchmarkAttempts; ++attempt) {
-            // Dla kazdej proby przygotowujemy zestaw danych zaleznny od rozmiaru i numeru proby.
+            // Dla każdej próby przygotowujemy zestaw danych zależny od rozmiaru i numeru próby.
             const auto values = generateBenchmarkData(size, size + 4, benchmarkSeed(size, attempt));
             const int targetValue = values[size / 2];
             const int increasedPriority = values[size * 2] + size * 5;
@@ -154,61 +165,26 @@ void benchmarkQueue(const std::string& structureName, const std::string& results
             const int insertValue = values[size * 2 + 2];
             const int insertPriority = values[size * 2 + 3];
 
-            {
-                Queue queue;
-                fillQueueForBenchmark(queue, values, size);
-                // Kazdy pomiar startuje od swiezo zbudowanej struktury o tym samym rozmiarze N.
-                const auto start = Clock::now();
-                queue.insert(insertValue, insertPriority);
-                const auto end = Clock::now();
-                sumInsert += std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
-            }
-
-            {
-                Queue queue;
-                fillQueueForBenchmark(queue, values, size);
-                const auto start = Clock::now();
-                queue.extractMax();
-                const auto end = Clock::now();
-                sumExtractMax += std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
-            }
-
-            {
-                Queue queue;
-                fillQueueForBenchmark(queue, values, size);
-                const auto start = Clock::now();
-                queue.peek();
-                const auto end = Clock::now();
-                sumPeek += std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
-            }
-
-            {
-                Queue queue;
-                fillQueueForBenchmark(queue, values, size);
-                const auto start = Clock::now();
-                queue.modifyKey(targetValue, increasedPriority);
-                const auto end = Clock::now();
-                sumModifyKeyIncrease += std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
-            }
-
-            {
-                Queue queue;
-                fillQueueForBenchmark(queue, values, size);
-                const auto start = Clock::now();
-                queue.modifyKey(targetValue, decreasedPriority);
-                const auto end = Clock::now();
-                sumModifyKeyDecrease += std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
-            }
-
-            {
-                Queue queue;
-                fillQueueForBenchmark(queue, values, size);
-                const auto start = Clock::now();
-                volatile const auto measuredSize = queue.size();
+            sumInsert += measureOperation(values, [&](Queue& q) {
+                q.insert(insertValue, insertPriority);
+            });
+            sumExtractMax += measureOperation(values, [](Queue& q) {
+                q.extractMax();
+            });
+            sumPeek += measureOperation(values, [](Queue& q) {
+                q.peek();
+            });
+            sumModifyKeyIncrease += measureOperation(values, [&](Queue& q) {
+                q.modifyKey(targetValue, increasedPriority);
+            });
+            sumModifyKeyDecrease += measureOperation(values, [&](Queue& q) {
+                q.modifyKey(targetValue, decreasedPriority);
+            });
+            sumSize += measureOperation(values, [](Queue& q) {
+                // `volatile` zapobiega usunięciu wywołania przez optymalizator.
+                volatile const auto measuredSize = q.size();
                 (void)measuredSize;
-                const auto end = Clock::now();
-                sumSize += std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
-            }
+            });
         }
 
         const long long avgInsert = sumInsert / kBenchmarkAttempts;
@@ -238,7 +214,7 @@ template <typename Queue>
 void menuPriorityQueue(const std::string& title,
                        const std::string& autosaveFile,
                        const std::string& manualSaveFile) {
-    // Menu operuje na jednej instancji kolejki, dopoki uzytkownik nie wroci do menu glownego.
+    // Menu operuje na jednej instancji kolejki, dopóki użytkownik nie wróci do menu głównego.
     Queue queue;
 
     while (true) {
@@ -263,7 +239,7 @@ void menuPriorityQueue(const std::string& title,
             const int value = readInt("Podaj element: ");
             const int priority = readInt("Podaj priorytet: ");
             queue.insert(value, priority);
-            // Po kazdej zmianie zapisujemy stan pomocniczy, zeby latwo bylo podejrzec dane.
+            // Po każdej zmianie zapisujemy stan pomocniczy, żeby łatwo było podejrzeć dane.
             saveQueueState(queue, autosaveFile);
             std::cout << "Element zostal dodany.\n";
             break;
@@ -297,7 +273,7 @@ void menuPriorityQueue(const std::string& title,
             std::cout << "Rozmiar kolejki: " << queue.size() << '\n';
             break;
         case 6:
-            // Osobny zapis pozwala recznie wyeksportowac aktualny stan pod wybrana nazwa pliku.
+            // Osobny zapis pozwala ręcznie wyeksportować aktualny stan pod wybraną nazwą pliku.
             if (queue.saveToCSV(manualSaveFile)) {
                 std::cout << "Zapisano stan do pliku: " << manualSaveFile << '\n';
             } else {

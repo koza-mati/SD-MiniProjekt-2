@@ -1,57 +1,57 @@
 # SD-MiniProjekt-2
 
-Projekt z kursu Struktury Danych przedstawiajacy implementacje kolejki priorytetowej typu MAX w jezyku C++. W projekcie zaimplementowano dwie rozne struktury realizujace ten sam abstrakcyjny typ danych, przygotowano menu tekstowe do obslugi operacji oraz modul badan wydajnosciowych zapisujacy wyniki do plikow CSV.
+Projekt z kursu Struktury Danych przedstawiający implementację kolejki priorytetowej typu MAX w języku C++. W projekcie zaimplementowano dwie różne struktury realizujące ten sam abstrakcyjny typ danych, przygotowano menu tekstowe do obsługi operacji oraz moduł badań wydajnościowych zapisujący wyniki do plików CSV.
 
 ## Cel projektu
 
 Celem projektu jest:
 
 - implementacja kolejki priorytetowej typu MAX,
-- porownanie dwoch roznych reprezentacji tej samej struktury danych,
-- wykonanie pomiarow czasu dzialania podstawowych operacji,
-- zapis wynikow badan do plikow tekstowych i CSV.
+- porównanie dwóch różnych reprezentacji tej samej struktury danych,
+- wykonanie pomiarów czasu działania podstawowych operacji,
+- zapis wyników badań do plików tekstowych i CSV.
 
-Zgodnie z trescia zadania zaimplementowano operacje:
+Zgodnie z treścią zadania zaimplementowano operacje:
 
 - `insert(e, p)` - dodanie elementu `e` o priorytecie `p`,
-- `extract-max()` - usuniecie i zwrocenie elementu o najwyzszym priorytecie,
-- `find-max()` / `peek()` - podejrzenie elementu o najwyzszym priorytecie bez usuwania,
+- `extract-max()` - usunięcie i zwrócenie elementu o najwyższym priorytecie,
+- `find-max()` / `peek()` - podejrzenie elementu o najwyższym priorytecie bez usuwania,
 - `modify-key(e, p)` - zmiana priorytetu wybranego elementu,
-- `return-size` - zwrocenie liczby elementow w strukturze.
+- `return-size` - zwrócenie liczby elementów w strukturze.
 
-## Uzyte technologie
+## Użyte technologie
 
-Projekt zostal napisany w:
+Projekt został napisany w:
 
 - `C++20`
 - biblioteka standardowa C++ (`vector`, `optional`, `fstream`, `chrono`, `random`, `string`, `limits`)
 - `windows.h` wykorzystywane jedynie do wygodnej pracy z menu konsolowym na Windows
 
-Kod jest podzielony na pliki naglowkowe `hpp`, plik implementacyjny `cpp` dla warstwy aplikacyjnej oraz pliki `tpp` dla implementacji klas szablonowych.
+Kod jest podzielony na pliki nagłówkowe `hpp`, plik implementacyjny `cpp` dla warstwy aplikacyjnej oraz pliki `tpp` dla implementacji klas szablonowych.
 
-## Zawartosc projektu
+## Zawartość projektu
 
 Struktura katalogu `src/`:
 
 - `main.cpp` - punkt startowy programu
 - `menu.hpp` - deklaracje funkcji menu
-- `menu.cpp` - obsluga menu, zapis CSV oraz benchmarki
-- `IPriorityQueue.hpp` - wspolny interfejs kolejek priorytetowych
-- `PriorityQueueCommon.hpp` - wspolne definicje wpisu kolejki i porownywania priorytetow
+- `menu.cpp` - obsługa menu, zapis CSV oraz benchmarki
+- `IPriorityQueue.hpp` - wspólny interfejs kolejek priorytetowych
+- `PriorityQueueCommon.hpp` - wspólne definicje wpisu kolejki i porównywania priorytetów
 - `BinaryHeapPriorityQueue.hpp` - deklaracja kolejki priorytetowej opartej na kopcu
 - `BinaryHeapPriorityQueue.tpp` - implementacja kolejki na kopcu binarnym
-- `LinkedListPriorityQueue.hpp` - deklaracja kolejki priorytetowej opartej na liscie jednokierunkowej
-- `LinkedListPriorityQueue.tpp` - implementacja kolejki na liscie jednokierunkowej
+- `LinkedListPriorityQueue.hpp` - deklaracja kolejki priorytetowej opartej na liście jednokierunkowej
+- `LinkedListPriorityQueue.tpp` - implementacja kolejki na liście jednokierunkowej
 
-## Wspolny model danych
+## Wspólny model danych
 
-Kazdy element kolejki jest reprezentowany przez strukture:
+Każdy element kolejki jest reprezentowany przez strukturę:
 
-- `value` - przechowywana wartosc,
+- `value` - przechowywana wartość,
 - `priority` - priorytet elementu,
-- `order` - numer kolejnosci wstawienia.
+- `order` - numer kolejności wstawienia.
 
-Pole `order` zostalo dodane po to, aby przy rownych priorytetach zachowac zasade FIFO. Oznacza to, ze jesli dwa elementy maja ten sam priorytet, jako "lepszy" traktowany jest ten, ktory zostal dodany wczesniej.
+Pole `order` zostało dodane po to, aby przy równych priorytetach zachować zasadę FIFO. Oznacza to, że jeśli dwa elementy mają ten sam priorytet, jako "lepszy" traktowany jest ten, który został dodany wcześniej.
 
 ## Implementacja 1 - kopiec binarny
 
@@ -61,48 +61,48 @@ Pierwsza implementacja kolejki priorytetowej korzysta z kopca binarnego typu MAX
 
 Kopiec jest przechowywany w tablicy dynamicznej (`std::vector`). Dla indeksu `i`:
 
-- rodzic znajduje sie pod indeksem `(i - 1) / 2`,
+- rodzic znajduje się pod indeksem `(i - 1) / 2`,
 - lewe dziecko pod `2 * i + 1`,
 - prawe dziecko pod `2 * i + 2`.
 
-### Dzialanie operacji
+### Działanie operacji
 
 - `insert` - dodaje element na koniec tablicy i wykonuje `heapifyUp`
-- `extractMax` - usuwa korzen, przenosi ostatni element na poczatek i wykonuje `heapifyDown`
+- `extractMax` - usuwa korzeń, przenosi ostatni element na początek i wykonuje `heapifyDown`
 - `peek` - zwraca element z korzenia kopca
-- `modifyKey` - zmienia priorytet wskazanego elementu i naprawia kopiec w gore lub w dol
-- `size` - zwraca liczbe elementow w wektorze
+- `modifyKey` - zmienia priorytet wskazanego elementu i naprawia kopiec w górę lub w dół
+- `size` - zwraca liczbę elementów w wektorze
 
-### Zlozonosc
+### Złożoność
 
 - `insert` - `O(log n)`
 - `extractMax` - `O(log n)`
 - `peek` - `O(1)`
-- `modifyKey` - `O(n)` na znalezienie elementu + `O(log n)` na naprawe kopca
+- `modifyKey` - `O(n)` na znalezienie elementu + `O(log n)` na naprawę kopca
 - `size` - `O(1)`
 
 ## Implementacja 2 - lista jednokierunkowa
 
-Druga implementacja kolejki priorytetowej wykorzystuje nieuporzadkowana liste jednokierunkowa.
+Druga implementacja kolejki priorytetowej wykorzystuje nieuporządkowaną listę jednokierunkową.
 
 ### Reprezentacja
 
-Kazdy wezel przechowuje:
+Każdy węzeł przechowuje:
 
 - jeden wpis kolejki,
-- wskaznik na nastepny element.
+- wskaźnik na następny element.
 
-Nowe elementy dodawane sa zawsze na poczatek listy.
+Nowe elementy dodawane są zawsze na początek listy.
 
-### Dzialanie operacji
+### Działanie operacji
 
-- `insert` - wstawia nowy element na poczatek listy
-- `extractMax` - przeszukuje liste liniowo, znajduje maksimum i usuwa odpowiedni wezel
-- `peek` - przeszukuje liste liniowo i zwraca element o najwyzszym priorytecie
-- `modifyKey` - wyszukuje pierwszy element o podanej wartosci i zmienia jego priorytet
-- `size` - zwraca aktualny licznik elementow
+- `insert` - wstawia nowy element na początek listy
+- `extractMax` - przeszukuje listę liniowo, znajduje maksimum i usuwa odpowiedni węzeł
+- `peek` - przeszukuje listę liniowo i zwraca element o najwyższym priorytecie
+- `modifyKey` - wyszukuje pierwszy element o podanej wartości i zmienia jego priorytet
+- `size` - zwraca aktualny licznik elementów
 
-### Zlozonosc
+### Złożoność
 
 - `insert` - `O(1)`
 - `extractMax` - `O(n)`
@@ -112,17 +112,17 @@ Nowe elementy dodawane sa zawsze na poczatek listy.
 
 ## Interfejs programu
 
-Program uruchamia menu tekstowe w konsoli. Uzytkownik moze:
+Program uruchamia menu tekstowe w konsoli. Użytkownik może:
 
-- wybrac implementacje oparta na kopcu,
-- wybrac implementacje oparta na liscie,
-- wykonac badania wydajnosciowe,
-- zakonczyc program.
+- wybrać implementację opartą na kopcu,
+- wybrać implementację opartą na liście,
+- wykonać badania wydajnościowe,
+- zakończyć program.
 
-Dla kazdej implementacji dostepne sa operacje:
+Dla każdej implementacji dostępne są operacje:
 
 - dodanie elementu z priorytetem,
-- usuniecie maksimum,
+- usunięcie maksimum,
 - podejrzenie maksimum,
 - zmiana priorytetu,
 - odczyt rozmiaru,
@@ -133,31 +133,31 @@ Dla kazdej implementacji dostepne sa operacje:
 
 ## Generowanie danych
 
-Losowe dane generowane sa osobno dla obu implementacji.
+Losowe dane generowane są osobno dla obu implementacji.
 
-Przyjeto, ze:
+Przyjęto, że:
 
-- wartosci elementow sa losowane z dodatniego zakresu liczb calkowitych,
-- priorytety sa losowane z zakresu wiekszego niz rozmiar struktury,
-- w menu generowanie odbywa sie z zakresu `1` do `size * 5 + 10`.
+- wartości elementów są losowane z dodatniego zakresu liczb całkowitych,
+- priorytety są losowane z zakresu większego niż rozmiar struktury,
+- w menu generowanie odbywa się z zakresu `1` do `size * 5 + 10`.
 
-To spelnia zalozenie z tresci projektu, ze zakres priorytetow powinien byc kilkukrotnie wiekszy od liczby elementow.
+To spełnia założenie z treści projektu, że zakres priorytetów powinien być kilkukrotnie większy od liczby elementów.
 
-## FIFO przy rownych priorytetach
+## FIFO przy równych priorytetach
 
-W projekcie przyjeto zasade FIFO dla elementow o tym samym priorytecie.
+W projekcie przyjęto zasadę FIFO dla elementów o tym samym priorytecie.
 
 Realizacja:
 
-- kazdy element otrzymuje numer `order`,
-- podczas porownania najpierw sprawdzany jest `priority`,
-- jesli priorytety sa rowne, wyzej oceniany jest element z mniejszym `order`.
+- każdy element otrzymuje numer `order`,
+- podczas porównania najpierw sprawdzany jest `priority`,
+- jeśli priorytety są równe, wyżej oceniany jest element z mniejszym `order`.
 
-Takie rozwiazanie dziala tak samo dla kopca i dla implementacji listowej.
+Takie rozwiązanie działa tak samo dla kopca i dla implementacji listowej.
 
-## Badania wydajnosciowe
+## Badania wydajnościowe
 
-Program zawiera modul benchmarkow porownujacy obie implementacje.
+Program zawiera moduł benchmarków porównujący obie implementacje.
 
 ### Mierzone operacje
 
@@ -168,29 +168,29 @@ Program zawiera modul benchmarkow porownujacy obie implementacje.
 - `decreaseKey`
 - `returnSize`
 
-### Sposob pomiaru
+### Sposób pomiaru
 
-- pomiary wykonywane sa dla kilku rozmiarow struktur,
-- dla kazdego rozmiaru kazda operacja jest wykonywana 100 razy,
-- kazdy pomiar startuje od nowo zbudowanej struktury o tym samym rozmiarze,
-- dane testowe sa generowane deterministycznie na podstawie ziarna (`seed`),
-- na koniec zapisywana jest srednia wartosc czasu w nanosekundach.
+- pomiary wykonywane są dla kilku rozmiarów struktur,
+- dla każdego rozmiaru każda operacja jest wykonywana 100 razy,
+- każdy pomiar startuje od nowo zbudowanej struktury o tym samym rozmiarze,
+- dane testowe są generowane deterministycznie na podstawie ziarna (`seed`),
+- na koniec zapisywana jest średnia wartość czasu w nanosekundach.
 
 ### Pliki wynikowe
 
-Po uruchomieniu benchmarkow program tworzy:
+Po uruchomieniu benchmarków program tworzy:
 
-- `pomiary.txt` - zbiorcze zestawienie wynikow
+- `pomiary.txt` - zbiorcze zestawienie wyników
 - `benchmark_kopiec.csv` - wyniki dla kopca binarnego
 - `benchmark_lista.csv` - wyniki dla implementacji listowej
-- `seedy_100000.txt` - zapis przykladowych ziaren losowania
+- `seedy_100000.txt` - zapis przykładowych ziaren losowania
 
 ## Zapis i odczyt CSV
 
-Obie implementacje potrafia:
+Obie implementacje potrafią:
 
-- zapisac aktualny stan kolejki do pliku CSV,
-- odczytac dane z pliku CSV i odbudowac strukture.
+- zapisać aktualny stan kolejki do pliku CSV,
+- odczytać dane z pliku CSV i odbudować strukturę.
 
 Format zapisu:
 
@@ -203,7 +203,7 @@ value,priority,order
 
 ## Kompilacja
 
-Przykladowa komenda kompilacji:
+Przykładowa komenda kompilacji:
 
 ```bash
 g++ -std=c++20 -Wall -Wextra -pedantic -I src src/main.cpp src/menu.cpp -o app.exe
@@ -211,7 +211,7 @@ g++ -std=c++20 -Wall -Wextra -pedantic -I src src/main.cpp src/menu.cpp -o app.e
 
 ## Uruchomienie
 
-Po kompilacji program mozna uruchomic poleceniem:
+Po kompilacji program można uruchomić poleceniem:
 
 ```bash
 ./app.exe
@@ -223,23 +223,23 @@ lub w systemie Windows:
 app.exe
 ```
 
-## Najwazniejsze decyzje projektowe
+## Najważniejsze decyzje projektowe
 
-- zastosowano dwie rozne reprezentacje kolejki priorytetowej, aby mozna bylo porownac ich zachowanie
+- zastosowano dwie różne reprezentacje kolejki priorytetowej, aby można było porównać ich zachowanie
 - jedna z implementacji to kopiec binarny, zgodnie z wymaganiami projektu
-- dla rownych priorytetow przyjeto FIFO
-- interfejs kolejek zostal ujednolicony przez `IPriorityQueue`
-- menu i benchmarki korzystaja z tych samych operacji dla obu struktur
+- dla równych priorytetów przyjęto FIFO
+- interfejs kolejek został ujednolicony przez `IPriorityQueue`
+- menu i benchmarki korzystają z tych samych operacji dla obu struktur
 
 ## Podsumowanie
 
-Projekt realizuje wymagania miniprojektu dotyczace kolejki priorytetowej typu MAX. Zawiera:
+Projekt realizuje wymagania miniprojektu dotyczące kolejki priorytetowej typu MAX. Zawiera:
 
 - dwie implementacje kolejki priorytetowej,
-- obsluge wszystkich wymaganych operacji,
+- obsługę wszystkich wymaganych operacji,
 - generowanie danych losowych,
-- pomiary wydajnosci,
-- zapis wynikow do plikow CSV i TXT,
-- czytelny podzial na pliki odpowiedzialne za konkretne elementy systemu.
+- pomiary wydajności,
+- zapis wyników do plików CSV i TXT,
+- czytelny podział na pliki odpowiedzialne za konkretne elementy systemu.
 
-Projekt moze sluzyc zarowno jako rozwiazanie zadania laboratoryjnego, jak i jako material do porownania kosztow operacji w roznych implementacjach kolejki priorytetowej.
+Projekt może służyć zarówno jako rozwiązanie zadania laboratoryjnego, jak i jako materiał do porównania kosztów operacji w różnych implementacjach kolejki priorytetowej.
