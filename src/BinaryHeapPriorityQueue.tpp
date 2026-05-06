@@ -21,7 +21,7 @@ void BinaryHeapPriorityQueue<T, PriorityType>::clear() noexcept {
 template <typename T, typename PriorityType>
 void BinaryHeapPriorityQueue<T, PriorityType>::insert(const T& value, const PriorityType& priority) {
     // Tworzymy nowy wpis na końcu tablicy.
-    data_.push_back(Entry{value, priority, nextOrder_++});
+    data_.pushBack(Entry{value, priority, nextOrder_++});
     // Po dodaniu element trafia na koniec tablicy i jest przesuwany w górę kopca.
     heapifyUp(data_.size() - 1);
 }
@@ -34,10 +34,10 @@ BinaryHeapPriorityQueue<T, PriorityType>::extractMax() {
     }
 
     // W MAX-kopcu maksimum zawsze znajduje się w korzeniu.
-    Entry result = std::move(data_.front());
+    Entry result = std::move(data_[0]);
     // Korzeń zastępujemy ostatnim elementem, a potem odtwarzamy własność kopca.
-    data_.front() = std::move(data_.back());
-    data_.pop_back();
+    data_[0] = std::move(data_[data_.size() - 1]);
+    data_.popBack();
 
     if (!data_.empty()) {
         heapifyDown(0);
@@ -54,7 +54,7 @@ BinaryHeapPriorityQueue<T, PriorityType>::peek() const {
     }
 
     // Podejrzenie maksimum nie zmienia struktury, zwracamy tylko korzeń.
-    return data_.front();
+    return data_[0];
 }
 
 template <typename T, typename PriorityType>
@@ -99,7 +99,8 @@ bool BinaryHeapPriorityQueue<T, PriorityType>::saveToCSV(const std::string& file
 
     // Zapisujemy cały stan wewnętrzny kopca, żeby można było go później odtworzyć.
     file << "value,priority,order\n";
-    for (const auto& entry : data_) {
+    for (std::size_t i = 0; i < data_.size(); ++i) {
+        const auto& entry = data_[i];
         file << entry.value << ',' << entry.priority << ',' << entry.order << '\n';
     }
 
